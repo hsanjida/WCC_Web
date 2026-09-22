@@ -1,0 +1,14 @@
+'use client';
+
+import { useState } from 'react';
+import { api } from '@/lib/api';
+
+export default function ReportIssuePage() {
+  const [form, setForm] = useState({ reporterName: '', reporterContact: '', location: '', title: '', description: '', photoUrl: '' });
+  const [result, setResult] = useState('');
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const update = (event) => setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
+  const submit = async (event) => { event.preventDefault(); setSaving(true); setError(''); setResult(''); try { const response = await api.reportIssue(form); setResult(response.issueCode); setForm({ reporterName: '', reporterContact: '', location: '', title: '', description: '', photoUrl: '' }); } catch (err) { setError(err.message); } finally { setSaving(false); } };
+  return <main className="min-h-screen bg-slate-50 px-4 py-14 sm:px-8"><div className="mx-auto max-w-2xl space-y-6"><header><p className="text-xs font-bold uppercase tracking-wider text-[#B62A35]">Community action</p><h1 className="mt-1 text-4xl font-black text-slate-900">Report an Issue</h1><p className="mt-2 text-sm text-slate-600">Tell WCC about a community problem and keep the tracking code we provide.</p></header>{result && <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-800">Issue submitted. Your tracking code is <strong>{result}</strong>.</div>}{error && <div className="rounded-2xl bg-rose-50 p-4 text-sm text-rose-700">{error}</div>}<form onSubmit={submit} className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs"><input required name="reporterName" value={form.reporterName} onChange={update} placeholder="Your name" className="field" /><input required name="reporterContact" value={form.reporterContact} onChange={update} placeholder="Email or phone" className="field" /><input required name="location" value={form.location} onChange={update} placeholder="Issue location" className="field" /><input required name="title" value={form.title} onChange={update} placeholder="Issue title" className="field" /><textarea required name="description" value={form.description} onChange={update} placeholder="Describe the issue" className="field min-h-32" /><input name="photoUrl" value={form.photoUrl} onChange={update} placeholder="Photo URL (optional)" className="field" /><button disabled={saving} className="rounded-xl bg-[#B62A35] px-4 py-3 text-sm font-bold text-white disabled:opacity-50">{saving ? 'Submitting...' : 'Submit issue'}</button></form></div></main>;
+}
